@@ -55,6 +55,7 @@ voices = {
     _Stati.Monophthong: ['a', 'e', 'i', 'o', 'u', 'eu'],
     _Stati.Diphthong: ['ia', 'ie', 'io', 'iu', 'ua', 'ue', 'ui', 'uo', 'ai', 'ei', 'oi', 'au', 'ou'],
     _Stati.Pure_Consonant: ['p', 'f', 'm', 'b', 'v', 'th', 'dh', 't', 'n', 'd', 's', 'z', 'sh', 'zh', 'c', 'j', 'ch', 'jh', 'k', 'ng', 'g', 'h', 'w', 'y'],
+    _Stati.Triphthong: ['iau', 'iou', 'uai', 'uei'],
     _Stati.Liquid: ['l', 'r'],
     _Stati.Glide: []
 }
@@ -127,7 +128,7 @@ class Word:
             cloj.slices.append(aslice)
             cloj.next_index = next_index
 
-        def __do_vowel(cloj):
+        def __do_monophthong(cloj):
             
             if len(cloj.slices) > 1 and not _Stati.is_any_of(cloj.slices[-2][0], _Stati.Consonant):
                 return False
@@ -136,20 +137,11 @@ class Word:
             
             cloj.syllables += 1
             
-        def __do_monophthong(cloj):
-            return __do_vowel(cloj)
-            
         def __do_diphthong(cloj):
-            if len(cloj.slices) > 1:
-                if not _Stati.is_any_of(cloj.slices[-2][0], _Stati.Consonant) and cloj.slices[-2][1] not in ['i', 'u']: 
-                    return False
-
-            cloj.consonant_seq_length = 0  # Reset
-            
-            cloj.syllables += 1
+            return __do_monophthong(cloj)
         
         def __do_triphthong(cloj):
-            return __do_vowel(cloj)
+            return __do_monophthong(cloj)
 
         def __do_pure_consonant(cloj):
             
@@ -206,7 +198,7 @@ class Word:
                 new_cloj = cloj.copy()
                 __save_status(new_cloj, aslice[0], aslice[1])
                 slice_valid = {
-                    _Stati.Monophthong : lambda: __do_vowel(new_cloj),
+                    _Stati.Monophthong : lambda: __do_monophthong(new_cloj),
                     _Stati.Diphthong : lambda: __do_diphthong(new_cloj),
                     _Stati.Triphthong : lambda: __do_triphthong(new_cloj),
                     _Stati.Pure_Consonant : lambda: __do_pure_consonant(new_cloj),
